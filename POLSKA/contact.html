@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact | PolskaVoyage</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rouge: #DC143C;
+      --rouge-fonce: #a00e2b;
+      --noir: #111111;
+      --gris: #2a2a2a;
+      --gris-clair: #f5f5f5;
+      --blanc: #ffffff;
+      --texte: #333333;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--texte);
+      background: var(--blanc);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(17,17,17,0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--blanc);
+      font-size: 1.4rem;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span { color: var(--rouge); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav ul a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    nav ul a:hover { color: var(--rouge); }
+
+    .hero {
+      height: 60vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%),
+                  url('contact.jpg') center/cover no-repeat;
+    }
+
+    .hero-content { color: var(--blanc); padding: 2rem; }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .section {
+      padding: 6rem 3rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 3rem;
+    }
+
+    .contact-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--noir);
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-info p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .contact-item .icon {
+      width: 40px;
+      height: 40px;
+      background: var(--rouge);
+      color: var(--blanc);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+
+    .contact-item span {
+      font-size: 0.95rem;
+      color: var(--texte);
+    }
+
+    .contact-form {
+      background: var(--gris-clair);
+      padding: 2rem;
+    }
+
+    .contact-form h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--noir);
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: var(--noir);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+    }
+
+    .form-group textarea {
+      height: 120px;
+      resize: vertical;
+    }
+
+    .btn-submit {
+      background: var(--rouge);
+      color: var(--blanc);
+      padding: 1rem 2rem;
+      border: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-submit:hover {
+      background: var(--rouge-fonce);
+    }
+
+    footer {
+      background: var(--gris);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--rouge); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      nav ul { gap: 1rem; }
+      .section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Polska<span>Voyage</span></a>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="cracovie.html">Cracovie</a></li>
+      <li><a href="varsovie.html">Varsovie</a></li>
+      <li><a href="zakopane.html">Zakopane</a></li>
+      <li><a href="gastronomie.html">Gastronomie</a></li>
+      <li><a href="hotels.html">Hôtels</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">Contactez-nous</p>
+      <h1>Restons en Contact</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <h2>Envoyez-nous un Message</h2>
+        <p>Vous avez des questions sur votre voyage en Pologne ? Vous cherchez des recommandations personnalisées ? Notre équipe est là pour vous aider à planifier votre séjour idéal.</p>
+        
+        <div class="contact-item">
+          <div class="icon">📍</div>
+          <span>ul. Marszałkowska 126/134, 00-008 Warszawa</span>
+        </div>
+        <div class="contact-item">
+          <div class="icon">📞</div>
+          <span>+48 22 123 45 67</span>
+        </div>
+        <div class="contact-item">
+          <div class="icon">✉️</div>
+          <span>contact@polskavoyage.pl</span>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <h2>Formulaire de Contact</h2>
+        <form>
+          <div class="form-group">
+            <label>Votre Nom</label>
+            <input type="text" placeholder="Jean Dupont">
+          </div>
+          <div class="form-group">
+            <label>Votre Email</label>
+            <input type="email" placeholder="jean@email.com">
+          </div>
+          <div class="form-group">
+            <label>Sujet</label>
+            <input type="text" placeholder="Réservation hôtel Cracovie">
+          </div>
+          <div class="form-group">
+            <label>Message</label>
+            <textarea placeholder="Décrivez votre demande..."></textarea>
+          </div>
+          <button type="submit" class="btn-submit">Envoyer</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Polska Voyage. Tous droits réservés. | <a href="#">Mentions légales</a> | <a href="#">Contact</a></p>
+  </footer>
+
+</body>
+</html>

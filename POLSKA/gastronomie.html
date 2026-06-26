@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gastronomie | PolskaVoyage</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rouge: #DC143C;
+      --rouge-fonce: #a00e2b;
+      --noir: #111111;
+      --gris: #2a2a2a;
+      --gris-clair: #f5f5f5;
+      --blanc: #ffffff;
+      --texte: #333333;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--texte);
+      background: var(--blanc);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(17,17,17,0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--blanc);
+      font-size: 1.4rem;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span { color: var(--rouge); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav ul a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    nav ul a:hover { color: var(--rouge); }
+
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%),
+                  url('gastronomie.jpg') center/cover no-repeat;
+    }
+
+    .hero-content { color: var(--blanc); padding: 2rem; }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .section {
+      padding: 6rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--noir);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .section p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #555;
+      font-weight: 300;
+    }
+
+    .plats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .plat-card {
+      background: var(--gris-clair);
+      overflow: hidden;
+    }
+
+    .plat-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .plat-card-content {
+      padding: 1.5rem;
+      border-left: 4px solid var(--rouge);
+    }
+
+    .plat-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--noir);
+      margin-bottom: 0.75rem;
+    }
+
+    .plat-card p {
+      font-size: 0.95rem;
+    }
+
+    .boissons-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .boisson-card {
+      background: var(--noir);
+      color: var(--blanc);
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .boisson-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--rouge);
+      margin-bottom: 0.75rem;
+    }
+
+    .boisson-card p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      background: var(--gris);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--rouge); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      nav ul { gap: 1rem; }
+      .section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Polska<span>Voyage</span></a>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="cracovie.html">Cracovie</a></li>
+      <li><a href="varsovie.html">Varsovie</a></li>
+      <li><a href="zakopane.html">Zakopane</a></li>
+      <li><a href="gastronomie.html">Gastronomie</a></li>
+      <li><a href="hotels.html">Hôtels</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">Poland</p>
+      <h1>Gastronomie Polonaise — Une Cuisine de l'Âme</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="section-label">Introduction</p>
+    <h2>Une Cuisine de Cœur</h2>
+    <p>La cuisine polonaise est généreuse, traditionnelle et profondément influencée par les saisons. Riche en saveurs réconfortantes, elle reflète l'âme du pays : des grand-mères aux fourneaux aux marchés colorés, chaque plat raconte une histoire. Pommes de terre, chou, viande fumée et épices douces en sont les ingrédients emblématiques.</p>
+  </section>
+
+  <section class="section" style="background: var(--gris-clair);">
+    <p class="section-label">Plats Incontournables</p>
+    <h2>6 Spécialités à Déguster</h2>
+    <div class="plats-grid">
+      <div class="plat-card">
+        <img src="pierogi.jpg" alt="Pierogi">
+        <div class="plat-card-content">
+          <h3>Pierogi</h3>
+          <p>Les pierogi sont les emblématiques raviolis polonais, farcis de viande, fromage, champignons ou fruits. Servis avec de la crème sure et du beurre fondu, ils sont LE plat national.</p>
+        </div>
+      </div>
+      <div class="plat-card">
+        <img src="zurek.jpg" alt="Żurek">
+        <div class="plat-card-content">
+          <h3>Żurek</h3>
+          <p>Soupe aigre au seigle de couleur trouble, servie dans un pain rond, avec du saucisson fumé et des œufs. Un délice réconfortant des matins d'hiver.</p>
+        </div>
+      </div>
+      <div class="plat-card">
+        <img src="bigos.jpg" alt="Bigos">
+        <div class="plat-card-content">
+          <h3>Bigos</h3>
+          <p>Ce ragoût de choucroute est un mélange savoureux de viandes fumées, choux, pruneaux et champignons. Préparé en grande quantité, il est encore meilleur réchauffé.</p>
+        </div>
+      </div>
+      <div class="plat-card">
+        <img src="oscypek.jpg" alt="Oscypek">
+        <div class="plat-card-content">
+          <h3>Oscypek</h3>
+          <p>Fromage fumé typique des Tatras, fabriqué à partir de lait de brebis. Grillé et servi avec de la confiture de airelles, c'est l'en-cas montagnard par excellence.</p>
+        </div>
+      </div>
+      <div class="plat-card">
+        <img src="golabki.jpg" alt="Gołąbki">
+        <div class="plat-card-content">
+          <h3>Gołąbki</h3>
+          <p>Feuilles de chou farcies de viande hachée et de riz, cuites dans une sauce tomate. Ce plat de grandma rappelle les réunions de famille.</p>
+        </div>
+      </div>
+      <div class="plat-card">
+        <img src="paczki.jpg" alt="Pączki">
+        <div class="plat-card-content">
+          <h3>Pączki</h3>
+          <p>Ces beignets légers fourrés à la confiture de rose sont une institution. Riches en beurre et œufs, ils sont traditionnellement mangés le jeudi gras.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="section-label">Boissons</p>
+    <h2>Ces Boissons à Ne Pas Manquer</h2>
+    <div class="boissons-grid">
+      <div class="boisson-card">
+        <h3>Vodka Polonaise</h3>
+        <p>La Pologne prétend être le berceau de la vodka. Żubrówka, Wyborowa ou Chopin — chacune a son caractère. À tasting !</p>
+      </div>
+      <div class="boisson-card">
+        <h3>Bière Żywiec</h3>
+        <p>La célèbre bière blonde de Zakopane, légère et rafraîchissante. La marque emblématique de la montagne polonaise.</p>
+      </div>
+      <div class="boisson-card">
+        <h3>Kompot</h3>
+        <p>Boisson chaude aux fruits secs, préparée en hiver. Un concentré de saveurs douces qui réchauffe le cœur.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Polska Voyage. Tous droits réservés. | <a href="#">Mentions légales</a> | <a href="#">Contact</a></p>
+  </footer>
+
+</body>
+</html>

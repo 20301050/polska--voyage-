@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Varsovie | PolskaVoyage</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rouge: #DC143C;
+      --rouge-fonce: #a00e2b;
+      --noir: #111111;
+      --gris: #2a2a2a;
+      --gris-clair: #f5f5f5;
+      --blanc: #ffffff;
+      --texte: #333333;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--texte);
+      background: var(--blanc);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(17,17,17,0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--blanc);
+      font-size: 1.4rem;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span { color: var(--rouge); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav ul a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    nav ul a:hover { color: var(--rouge); }
+
+    .hero {
+      height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%),
+                  url('varsovie-hero.jpg') center/cover no-repeat;
+    }
+
+    .hero-content { color: var(--blanc); padding: 2rem; }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+    }
+
+    .section {
+      padding: 6rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--noir);
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+    }
+
+    .section p {
+      font-size: 1rem;
+      line-height: 1.8;
+      color: #555;
+      font-weight: 300;
+    }
+
+    .lieux-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .lieu-card {
+      background: var(--gris-clair);
+      overflow: hidden;
+    }
+
+    .lieu-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .lieu-card-content {
+      padding: 1.5rem;
+      border-left: 4px solid var(--rouge);
+    }
+
+    .lieu-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--noir);
+      margin-bottom: 0.75rem;
+    }
+
+    .lieu-card p {
+      font-size: 0.95rem;
+    }
+
+    .infos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .info-item {
+      background: var(--noir);
+      color: var(--blanc);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .info-item .icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .info-item h4 {
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      margin-bottom: 0.5rem;
+    }
+
+    .info-item p {
+      color: rgba(255,255,255,0.8);
+      font-size: 0.9rem;
+    }
+
+    footer {
+      background: var(--gris);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--rouge); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      nav ul { gap: 1rem; }
+      .section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Polska<span>Voyage</span></a>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="cracovie.html">Cracovie</a></li>
+      <li><a href="varsovie.html">Varsovie</a></li>
+      <li><a href="zakopane.html">Zakopane</a></li>
+      <li><a href="gastronomie.html">Gastronomie</a></li>
+      <li><a href="hotels.html">Hôtels</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">Pologne</p>
+      <h1>Varsovie — La Capitale Résiliente</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="section-label">Histoire</p>
+    <h2>Une Ville Retournée de la Cendre</h2>
+    <p>Varsovie fut détruite à 85% pendant la Seconde Guerre mondiale. Après la guerre, les Habdachs entreprirent la Reconstruction historiques pour redonner vie à la ville. Son centre historique, méticuleusement reconstruit pierre par pierre, est aujourd'hui classé au patrimoine mondial de l'UNESCO.</p>
+  </section>
+
+  <section class="section" style="background: var(--gris-clair);">
+    <p class="section-label">Culture</p>
+    <h2>Entre Histoire et Modernité</h2>
+    <p>Varsovie vibré au rythme de sa culture. Le musée Frédéric Chopin rend hommage au compositeur genius, tandis que la cuisine moderne polonaise se réinvente dans les restaurants gastronomiques. La ville est aussi connue pour sa vie nocturne animée et son street art coloré qui orne les murs de la ville.</p>
+  </section>
+
+  <section class="section">
+    <p class="section-label">Incontournables</p>
+    <h2>3 Lieux à Découvrir</h2>
+    <div class="lieux-grid">
+      <div class="lieu-card">
+        <img src="vieilleville.jpg" alt="Vieille Ville">
+        <div class="lieu-card-content">
+          <h3>Vieille Ville</h3>
+          <p>Entièrement reconstruite après la guerre, ses façades colorées et sa place du marché captivent tous les visiteurs.</p>
+        </div>
+      </div>
+      <div class="lieu-card">
+        <img src="palaisculture.jpg" alt="Palais de la Culture">
+        <div class="lieu-card-content">
+          <h3>Palais de la Culture</h3>
+          <p>Don创造的 cadeau de Staline, ce gratte-ciel stalinien offre une vue panoramique sur la skyline de la ville.</p>
+        </div>
+      </div>
+      <div class="lieu-card">
+        <img src="musee.jpg" alt="Musée du Soulèvement">
+        <div class="lieu-card-content">
+          <h3>Musée du Soulèvement</h3>
+          <p>Musée moderne racontant l'insurrection de 1944, une experience émotionnelle et pédagogique unique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="background: var(--noir); color: var(--blanc);">
+    <p class="section-label" style="color: var(--rouge);">Infos Pratiques</p>
+    <h2 style="color: var(--blanc);">Planifiez votre Voyage</h2>
+    <div class="infos-grid">
+      <div class="info-item">
+        <h4>Aéroports</h4>
+        <p>Deux aéroports : Chopin (centre) et Modlin (low-cost)</p>
+      </div>
+      <div class="info-item">
+        <h4>Transport</h4>
+        <p>Métro moderne, tramways et bus, idéale toute l'année</p>
+      </div>
+      <div class="info-item">
+        <h4>Monnaie</h4>
+        <p>Zloty (PLN), 1 EUR ≈ 4.3 PLN</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Polska Voyage. Tous droits réservés. | <a href="#">Mentions légales</a> | <a href="#">Contact</a></p>
+  </footer>
+
+</body>
+</html>

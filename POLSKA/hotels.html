@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hôtels | PolskaVoyage</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --rouge: #DC143C;
+      --rouge-fonce: #a00e2b;
+      --noir: #111111;
+      --gris: #2a2a2a;
+      --gris-clair: #f5f5f5;
+      --blanc: #ffffff;
+      --texte: #333333;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--texte);
+      background: var(--blanc);
+    }
+
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 3rem;
+      background: rgba(17,17,17,0.92);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      color: var(--blanc);
+      font-size: 1.4rem;
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-logo span { color: var(--rouge); }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+
+    nav ul a {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    nav ul a:hover { color: var(--rouge); }
+
+    .hero {
+      height: 60vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.3) 100%),
+                  url('hotel.jpg') center/cover no-repeat;
+    }
+
+    .hero-content { color: var(--blanc); padding: 2rem; }
+
+    .hero-eyebrow {
+      font-size: 0.8rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 6vw, 4rem);
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .section {
+      padding: 6rem 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--rouge);
+      font-weight: 500;
+      margin-bottom: 1rem;
+    }
+
+    .section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: var(--noir);
+      margin-bottom: 2rem;
+      line-height: 1.2;
+    }
+
+    .ville-section {
+      margin-bottom: 4rem;
+    }
+
+    .hotels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+    }
+
+    .hotel-card {
+      background: var(--blanc);
+      border: 3px solid var(--rouge);
+      padding: 2rem;
+    }
+
+    .hotel-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .hotel-card-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      color: var(--noir);
+    }
+
+    .stars {
+      color: var(--rouge);
+      font-size: 1.2rem;
+    }
+
+    .hotel-card .ville {
+      font-size: 0.85rem;
+      color: var(--rouge);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .hotel-card .description {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    .hotel-card .prix {
+      font-weight: 500;
+      color: var(--noir);
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .btn-site {
+      display: inline-block;
+      background: var(--rouge);
+      color: var(--blanc);
+      padding: 0.75rem 1.5rem;
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 500;
+      transition: background 0.2s;
+    }
+
+    .btn-site:hover {
+      background: var(--rouge-fonce);
+    }
+
+    footer {
+      background: var(--gris);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.85rem;
+    }
+
+    footer a { color: var(--rouge); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      nav ul { gap: 1rem; }
+      .section { padding: 4rem 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">Polska<span>Voyage</span></a>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="cracovie.html">Cracovie</a></li>
+      <li><a href="varsovie.html">Varsovie</a></li>
+      <li><a href="zakopane.html">Zakopane</a></li>
+      <li><a href="gastronomie.html">Gastronomie</a></li>
+      <li><a href="hotels.html">Hôtels</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <p class="hero-eyebrow">Poland</p>
+      <h1>Où Dormir en Pologne</h1>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="ville-section">
+      <p class="section-label">Cracovie</p>
+      <h2>Hôtels à Cracovie</h2>
+      <div class="hotels-grid">
+        <div class="hotel-card">
+          <div class="hotel-card-header">
+            <h3>Hotel Copernicus</h3>
+            <span class="stars">★★★★★</span>
+          </div>
+          <p class="ville">Cracovie — Luxe</p>
+          <p class="description">Hôtel de luxe situé au cœur de la vieille ville, dans un palais Renaissance restauré. SPA complet et restaurant gastronomique.</p>
+          <p class="prix">500 - 800 PLN / nuit</p>
+          <a href="https://www.copernicus.hotel.com.pl" target="_blank" class="btn-site">Voir le site</a>
+        </div>
+        <div class="hotel-card">
+          <div class="hotel-card-header">
+            <h3>Hotel Kazimierz</h3>
+            <span class="stars">★★★</span>
+          </div>
+          <p class="ville">Cracovie — Charme</p>
+          <p class="description">Hôtel de charme dans le quartier jüif de Kazimierz. Décoration artistique et toit-terrasse avec vue sur les synagogues.</p>
+          <p class="prix">200 - 350 PLN / nuit</p>
+          <a href="https://www.hotelkazimierz.pl" target="_blank" class="btn-site">Voir le site</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ville-section">
+      <p class="section-label">Varsovie</p>
+      <h2>Hôtels à Varsovie</h2>
+      <div class="hotels-grid">
+        <div class="hotel-card">
+          <div class="hotel-card-header">
+            <h3>Hotel Bristol</h3>
+            <span class="stars">★★★★★</span>
+          </div>
+          <p class="ville">Varsovie — Palace Historique</p>
+          <p class="description">Palace historique face au Palais Présidentiel, ikon de Varsovie depuis 1901. Architecture néogothique et SPA luxueux.</p>
+          <p class="prix">700 - 1200 PLN / nuit</p>
+          <a href="https://www.hotelbristolwarsaw.pl" target="_blank" class="btn-site">Voir le site</a>
+        </div>
+        <div class="hotel-card">
+          <div class="hotel-card-header">
+            <h3>Puro Hotel</h3>
+            <span class="stars">★★★★</span>
+          </div>
+          <p class="ville">Varsovie — Design Moderne</p>
+          <p class="description">Hôtel design dans le quartier de Praga. Chambres minimalistes et rooftop bar avec vue panoramique.</p>
+          <p class="prix">350 - 500 PLN / nuit</p>
+          <a href="https://purohotel.pl" target="_blank" class="btn-site">Voir le site</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="ville-section">
+      <p class="section-label">Zakopane</p>
+      <h2>Hôtels à Zakopane</h2>
+      <div class="hotels-grid">
+        <div class="hotel-card">
+          <div class="hotel-card-header">
+            <h3>Logos Hotel</h3>
+            <span class="stars">★★★★</span>
+          </div>
+          <p class="ville">Zakopane — Vue Tatras</p>
+          <p class="description">Hôtel elegant au pied des Tatras avec vue imprenable sur les montagnes. SPA avec piscine thermale.</p>
+          <p class="prix">300 - 450 PLN / nuit</p>
+          <a href="https://www.logoshotel.pl" target="_blank" class="btn-site">Voir le site</a>
+        </div>
+        <div class="hotel-card">
+          <div class="hotel-card-header">
+            <h3>Villa Marilor</h3>
+            <span class="stars">★★★</span>
+          </div>
+          <p class="ville">Zakopane — Style Góral</p>
+          <p class="description">Maison d'hôtes de style Góral traditionnel en bois. Cheminée et atmosphère montagnarde authentique.</p>
+          <p class="prix">200 - 300 PLN / nuit</p>
+          <a href="https://www.villamarilor.pl" target="_blank" class="btn-site">Voir le site</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Polska Voyage. Tous droits réservés. | <a href="#">Mentions légales</a> | <a href="#">Contact</a></p>
+  </footer>
+
+</body>
+</html>
