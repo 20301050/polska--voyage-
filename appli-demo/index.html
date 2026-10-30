@@ -1,9 +1,28 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head><meta name="robots" content="noindex">
+<meta name="theme-color" content="#F20C49">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="sonigo">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+/* Sur téléphone et une fois installée : plein écran, sans cadre de téléphone */
+@media (max-width: 520px) { html, body { background: #FFFFFF; } .phone { box-shadow: none !important; border-radius: 0 !important; } }
+@media (display-mode: standalone) { html, body { background: #FFFFFF; } .phone { box-shadow: none !important; border-radius: 0 !important; } .web-only { display: none !important; } }
+.install { position: fixed; right: 12px; top: 12px; z-index: 9999; display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 0; border-radius: 22px; background: #F20C49; color: #FFFFFF; font: 800 14px 'Nunito Sans', sans-serif; cursor: pointer; box-shadow: 0 6px 16px rgba(242,12,73,.35); }
+.install img { width: 26px; height: 26px; }
+.ios-tip { position: fixed; left: 12px; right: 12px; bottom: 14px; z-index: 9999; display: none; background: #1E1E24; color: #FFFFFF; border-radius: 18px; padding: 14px 44px 14px 16px; font: 600 14.5px/1.45 'Nunito Sans', sans-serif; box-shadow: 0 10px 24px rgba(0,0,0,.3); }
+.ios-tip b { color: #FFD23F; }
+.ios-tip button { position: absolute; right: 6px; top: 6px; width: 36px; height: 36px; border: 0; background: none; color: #FFFFFF; font-size: 20px; cursor: pointer; }
+</style>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sonigo – Prototype avec Smok</title>
+<title>sonigo – l’appli</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -66,7 +85,7 @@ a { color: #C8093C; } a:hover { color: #9E0730; }
 #ecran-smok .note { font-size: 11.5px; color: #8A8A92; text-align: center; margin-top: 8px; }
 </style>
 </head>
-<body><a href="../appli.html" style="position:fixed;left:12px;top:12px;z-index:9999;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;background:#1E1E24;color:#fff;font:800 14px 'Nunito Sans',sans-serif;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.25)">← Retour au site</a><script>if(window.top!==window.self)document.currentScript.previousElementSibling.style.display="none";</script>
+<body><a class="web-only" href="../appli.html" style="position:fixed;left:12px;top:12px;z-index:9999;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;background:#1E1E24;color:#fff;font:800 14px 'Nunito Sans',sans-serif;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.25)">← Retour au site</a><button class="install web-only" id="install" type="button"><img src="icons/icon-192.png" alt="">Installer l’appli</button><div class="ios-tip web-only" id="iostip" role="note">Pour installer sonigo : touche <b>Partager</b> ⬆️ en bas de Safari, puis <b>« Sur l’écran d’accueil »</b>.<button type="button" aria-label="Fermer" id="iosclose">✕</button></div>
 <div class="stage"><div class="phone" id="phone">
 <section class="screen" id="ecran-accueil" aria-label="accueil">
 <div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
@@ -665,7 +684,8 @@ le polonais !"></span><span class="curseur" style="display: inline-block; width:
 (function () {
   var phone = document.getElementById('phone');
   function fit() {
-    var s = Math.min(1, (window.innerHeight - 40) / 956, (window.innerWidth - 30) / 440);
+    var full = window.innerWidth <= 520 || window.matchMedia('(display-mode: standalone)').matches;
+    var s = full ? Math.min(window.innerHeight / 956, window.innerWidth / 440) : Math.min(1, (window.innerHeight - 40) / 956, (window.innerWidth - 30) / 440);
     phone.style.transform = 'scale(' + s + ')';
   }
   window.addEventListener('resize', fit); fit();
@@ -852,6 +872,30 @@ le polonais !"></span><span class="curseur" style="display: inline-block; width:
   } catch (e) { setStatus(false); }
 })();
 
+</script>
+<script>
+(function () {
+  var inFrame = window.top !== window.self;
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  if (inFrame) document.querySelectorAll('.web-only').forEach(function (el) { el.style.display = 'none'; });
+  if (standalone) { var back = document.querySelector('a.web-only'); if (back) back.style.display = 'none'; }
+  if ('serviceWorker' in navigator && !inFrame) navigator.serviceWorker.register('sw.js').catch(function () {});
+  var btn = document.getElementById('install'), tip = document.getElementById('iostip'), deferred = null;
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault(); deferred = e;
+    if (!inFrame && !standalone) btn.style.display = 'inline-flex';
+  });
+  btn.addEventListener('click', function () {
+    if (!deferred) return;
+    deferred.prompt();
+    deferred.userChoice.then(function () { deferred = null; btn.style.display = 'none'; });
+  });
+  window.addEventListener('appinstalled', function () { btn.style.display = 'none'; });
+  var ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var seen = false; try { seen = localStorage.getItem('sonigo-iostip') === '1'; } catch (e) {}
+  if (ios && !standalone && !inFrame && !seen) tip.style.display = 'block';
+  document.getElementById('iosclose').addEventListener('click', function () { tip.style.display = 'none'; try { localStorage.setItem('sonigo-iostip', '1'); } catch (e) {} });
+})();
 </script>
 </body>
 </html>
