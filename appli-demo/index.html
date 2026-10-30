@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sonigo – Prototype avec Smok</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+html, body { margin: 0; height: 100%; background: #EDEBE7; font-family: 'Nunito Sans', sans-serif; color: #1E1E24; overflow: hidden; }
+a { color: #C8093C; } a:hover { color: #9E0730; }
+.stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+.phone { width: 440px; height: 956px; position: relative; flex-shrink: 0; transform-origin: center center; border-radius: 34px; overflow: hidden; background: #FFFFFF; box-shadow: 0 0 0 10px #1E1E24, 0 30px 60px rgba(0,0,0,0.25); }
+.screen { position: absolute; inset: 0; display: none; }
+.screen.on { display: block; }
+@keyframes smok-vol { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-9px) rotate(3deg); } }
+.smok { animation: smok-vol 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
+@keyframes bulle-pop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+.bulle { animation: bulle-pop 2.6s ease-in-out infinite; }
+@keyframes clignote { 0%,49% { visibility: visible; } 50%,100% { visibility: hidden; } }
+.curseur { animation: clignote 0.9s steps(1) infinite; }
+.scroll::-webkit-scrollbar { display: none; }
+@keyframes vol { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-4px) rotate(3deg); } }
+@keyframes blink { 0%,80%,100% { opacity: 0.25; } 40% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .smok, .bulle, .curseur, #ecran-smok .avatar img, #ecran-smok .typing span { animation: none; } }
+#ecran-smok { --red: #F20C49; --red-ink: #C8093C; --ink: #1E1E24; --grey: #F2F2F0; --muted: #5E5E66; }
+#ecran-smok .app { max-width: 440px; height: 100dvh; margin: 0 auto; background: #FFFFFF; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,0,0,0.08); }
+#ecran-smok header { flex-shrink: 0; background: var(--red); border-radius: 0 0 28px 28px; display: flex; align-items: center; gap: 12px; padding: 18px 18px; color: #FFFFFF; }
+#ecran-smok .avatar { width: 58px; height: 58px; border-radius: 29px; background: #FFFFFF; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; flex-shrink: 0; }
+#ecran-smok .avatar img { height: 56px; display: block; animation: vol 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
+#ecran-smok header h1 { margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; line-height: 1.1; }
+#ecran-smok .status { font-size: 13px; display: flex; align-items: center; gap: 6px; }
+#ecran-smok .dot { width: 8px; height: 8px; border-radius: 4px; background: #7CF2A0; }
+#ecran-smok .dot.off { background: #FFD36B; }
+#ecran-smok .brand { margin-left: auto; text-align: center; }
+#ecran-smok .brand b { display: block; font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 22px; letter-spacing: -0.5px; line-height: 1; }
+#ecran-smok .brand span { font-size: 6.5px; font-weight: 700; letter-spacing: 1.6px; }
+#ecran-smok main { flex: 1; overflow-y: auto; padding: 16px 16px 10px; }
+#ecran-smok .day { text-align: center; font-size: 12px; font-weight: 700; color: #8A8A92; margin-bottom: 12px; }
+#ecran-smok ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+#ecran-smok .me { align-self: flex-end; max-width: 80%; background: var(--red); color: #FFFFFF; border-radius: 18px 18px 4px 18px; padding: 10px 14px; font-size: 15px; line-height: 1.4; white-space: pre-wrap; }
+#ecran-smok .smokmsg { align-self: flex-start; max-width: 88%; display: flex; gap: 8px; align-items: flex-end; }
+#ecran-smok .mini { width: 34px; height: 34px; border-radius: 17px; background: #FFE1E8; display: flex; align-items: flex-end; justify-content: center; overflow: hidden; flex-shrink: 0; }
+#ecran-smok .mini img { height: 32px; display: block; }
+#ecran-smok .bubble { background: var(--grey); border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; }
+#ecran-smok .card { margin-top: 8px; background: #FFFFFF; border: 2px solid var(--red); border-radius: 12px; padding: 9px 12px; white-space: normal; }
+#ecran-smok .pl { font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: var(--red-ink); line-height: 1.3; }
+#ecran-smok .pron { font-size: 13px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+#ecran-smok .fr { font-size: 14px; font-weight: 700; margin-top: 2px; }
+#ecran-smok .tip { margin-top: 8px; font-size: 13.5px; color: #3C3C44; }
+#ecran-smok .tip b { color: var(--red-ink); }
+#ecran-smok .typing span { display: inline-block; width: 7px; height: 7px; border-radius: 4px; background: #9A9AA2; margin: 0 2px; animation: blink 1.2s infinite; }
+#ecran-smok .typing span:nth-child(2) { animation-delay: 0.2s; }
+#ecran-smok .typing span:nth-child(3) { animation-delay: 0.4s; }
+#ecran-smok .bottom { flex-shrink: 0; border-top: 1px solid #E4E4E0; padding: 10px 12px 14px; }
+#ecran-smok .label { font-size: 12px; font-weight: 800; color: var(--muted); margin: 0 4px 8px; }
+#ecran-smok .chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+#ecran-smok .chips::-webkit-scrollbar { display: none; }
+#ecran-smok .chips button { flex-shrink: 0; min-height: 40px; padding: 0 14px; border-radius: 20px; border: 2px solid var(--red); background: #FFFFFF; color: var(--red-ink); font: 800 13.5px 'Nunito Sans', sans-serif; cursor: pointer; }
+#ecran-smok form { display: flex; gap: 8px; margin-top: 10px; }
+#ecran-smok .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#ecran-smok textarea { flex: 1; min-width: 0; min-height: 46px; max-height: 120px; resize: none; border: 0; border-radius: 23px; background: var(--grey); padding: 12px 16px; font: 15px 'Nunito Sans', sans-serif; color: var(--ink); }
+#ecran-smok textarea:focus-visible { outline: 2px solid var(--red); }
+#ecran-smok .send { width: 46px; height: 46px; border-radius: 23px; border: 0; background: var(--red); color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; }
+#ecran-smok .send:disabled { opacity: 0.5; cursor: default; }
+#ecran-smok .note { font-size: 11.5px; color: #8A8A92; text-align: center; margin-top: 8px; }
+</style>
+</head>
+<body><a href="../appli.html" style="position:fixed;left:12px;top:12px;z-index:9999;display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:22px;background:#1E1E24;color:#fff;font:800 14px 'Nunito Sans',sans-serif;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.25)">← Retour au site</a><script>if(window.top!==window.self)document.currentScript.previousElementSibling.style.display="none";</script>
+<div class="stage"><div class="phone" id="phone">
+<section class="screen" id="ecran-accueil" aria-label="accueil">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<img src="01-accueil.jpg" alt="" aria-hidden="true" style="position: absolute; inset: 0; width: 440px; height: 956px; display: block">
+<h1 style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: 0">Visiter la Pologne avec sonigo, tourisme en Pologne</h1>
+<a href="#ecran-villes" aria-label="Je visite la Pologne" style="position: absolute; left: 70px; top: 679px; width: 300px; height: 56px; border-radius: 14px"></a>
+<a href="#ecran-connexion" aria-label="Je suis un guide" style="position: absolute; left: 70px; top: 750px; width: 300px; height: 58px; border-radius: 14px"></a>
+<a href="#ecran-connexion" aria-label="Connexion" style="position: absolute; left: 165px; top: 832px; width: 110px; height: 36px"></a>
+<a href="#ecran-smok" class="bulle" aria-label="Cześć ! Clique sur moi, je vais t’apprendre le polonais ! Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 128px; top: 410px; width: 196px; box-sizing: border-box; display: block; text-decoration: none; background: #FFFFFF; border-radius: 18px; padding: 12px 16px; box-shadow: 0 8px 22px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-height: 66px; white-space: pre-line; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.3; color: #C8093C"><span class="ty" data-full="Cześć ! Clique sur moi,
+je vais t’apprendre
+le polonais !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 15px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -12px; bottom: 10px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: -10px; top: 392px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 240px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 10px 12px rgba(0,0,0,0.22))"></a>
+</div>
+</section>
+<section class="screen" id="ecran-connexion" aria-label="connexion">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<img src="02-connexion.png" alt="" aria-hidden="true" style="position: absolute; inset: 0; width: 440px; height: 956px; display: block">
+<h1 style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); margin: 0">Connexion</h1>
+<a href="#ecran-accueil" aria-label="Retour à l'accueil" style="position: absolute; left: 352px; top: 40px; width: 48px; height: 48px; border-radius: 24px"></a>
+<a href="#ecran-villes" aria-label="Se connecter" style="position: absolute; left: 70px; top: 650px; width: 300px; height: 56px; border-radius: 14px"></a>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Witaj !, prononcé vitaï, veut dire Bienvenue !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; display: block; text-decoration: none; right: 150px; top: 760px; background: #FFFFFF; border-radius: 18px; padding: 9px 14px 10px; box-shadow: 0 8px 22px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 70px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Witaj !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 16px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 11.5px; font-weight: 700; color: #8A8A92; white-space: nowrap">[vitaï]</span>
+  <span aria-hidden="true" style="display: block; font-size: 12.5px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Bienvenue !</span>
+  
+  <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -12px; bottom: 8px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; display: block; right: 14px; top: 740px;"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 160px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 10px 12px rgba(0,0,0,0.22));"></a>
+</div>
+</section>
+<section class="screen" id="ecran-villes" aria-label="villes">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-connexion" aria-label="Retour" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<h1 style="margin: 30px 34px 22px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px">Choisir la ville</h1>
+<main style="flex: 1; padding: 0 22px 190px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 20px 18px">
+<a href="#" style="position: relative; display: block; border-radius: 22px; overflow: hidden; text-decoration: none; box-shadow: 0 6px 14px rgba(30,30,36,0.18)">
+  <img src="krakow.jpg" alt="Cracovie" style="width: 100%; height: 100%; object-fit: cover; object-position: 30% center; display: block">
+  <span style="position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 14px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 25px; color: #FFFFFF">Cracovie</span>
+</a>
+<a href="#ecran-varsovie" style="position: relative; display: block; border-radius: 22px; overflow: hidden; text-decoration: none; box-shadow: 0 6px 14px rgba(30,30,36,0.18)">
+  <img src="varsovie.jpg" alt="Varsovie" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block">
+  <span style="position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 14px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 25px; color: #FFFFFF">Varsovie</span>
+</a>
+<a href="#" style="position: relative; display: block; border-radius: 22px; overflow: hidden; text-decoration: none; box-shadow: 0 6px 14px rgba(30,30,36,0.18)">
+  <img src="zakopane.jpg" alt="Zakopane" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block">
+  <span style="position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 14px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 25px; color: #FFFFFF">Zakopane</span>
+</a>
+<a href="#" style="position: relative; display: block; border-radius: 22px; overflow: hidden; text-decoration: none; box-shadow: 0 6px 14px rgba(30,30,36,0.18)">
+  <img src="gdansk.jpg" alt="Gdańsk" style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block">
+  <span style="position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 14px; background: linear-gradient(transparent, rgba(0,0,0,0.6)); font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 25px; color: #FFFFFF">Gdańsk</span>
+</a>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Dokąd jedziemy ?, veut dire On va où ?. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 144px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Dokąd jedziemy ?"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= On va où ?</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-varsovie" aria-label="varsovie">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-villes" aria-label="Retour aux villes" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 16px 22px 200px">
+  <div style="position: relative; height: 230px; border-radius: 22px; overflow: hidden">
+    <img src="varsovie.jpg" alt="La vieille ville de Varsovie" style="width: 100%; height: 100%; object-fit: cover; display: block">
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 18px 16px; background: linear-gradient(transparent, rgba(0,0,0,0.55)); color: #FFFFFF"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px">Varsovie</div><div style="font-size: 14px">Le charme de la vieille ville</div></div>
+  </div>
+  <h1 style="margin: 26px 0 14px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px">Que veux-tu découvrir ?</h1>
+  <div role="group" aria-label="Filtrer les circuits" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 22px"><button type="button" aria-pressed="true" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: #F20C49; color: #FFFFFF; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 12.5px; opacity: 1">Tous</button><button type="button" aria-pressed="false" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: #F20C49; color: #FFFFFF; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 12.5px; opacity: 0.85">Légendes</button><button type="button" aria-pressed="false" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: #F20C49; color: #FFFFFF; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 12.5px; opacity: 0.85">Culture</button><button type="button" aria-pressed="false" style="height: 30px; padding: 0 14px; border-radius: 15px; border: 0; background: #F20C49; color: #FFFFFF; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 12.5px; opacity: 0.85">Vie nocturne</button></div>
+  <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 22px"><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px 14px 10px; box-shadow: 0 6px 10px rgba(30,30,36,0.2)">
+  <a href="#" style="display: grid; grid-template-columns: 104px 1fr auto; gap: 4px 12px; text-decoration: none; color: inherit">
+    <span style="position: relative; grid-row: 1 / 3"><img src="circ1.jpg" alt="" style="width: 104px; height: 92px; object-fit: cover; border-radius: 4px; display: block"><span style="position: absolute; left: -8px; top: -8px; width: 34px; height: 34px; border-radius: 17px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; border: 2px solid #FFFFFF">01</span></span>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.3; color: #1F2A44; grid-column: 2 / 4">Malédictions de Muranów</span>
+    <span style="align-self: end; justify-self: start; background: #F20C49; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 3px 14px; border-radius: 10px">Mystères & Légendes</span>
+    <span style="align-self: end; text-align: right; line-height: 1.1"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #1E1E24">28 €</span><span style="font-size: 10px; color: #3C3C44">/ pers</span></span>
+  </a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #5E5E66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F20C49" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l-3 2" stroke-linecap="round"></path></svg>9h30 à 19h00<span style="flex: 1"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="#1E1E24" aria-hidden="true"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1v2h-3v-2H8v2H5v-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 3v5h12V6zm1.5 7.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm9 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"></path></svg><button type="button" aria-label="Ajouter Malédictions de Muranów aux favoris" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E24" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px 14px 10px; box-shadow: 0 6px 10px rgba(30,30,36,0.2)">
+  <a href="#" style="display: grid; grid-template-columns: 104px 1fr auto; gap: 4px 12px; text-decoration: none; color: inherit">
+    <span style="position: relative; grid-row: 1 / 3"><img src="circ2.jpg" alt="" style="width: 104px; height: 92px; object-fit: cover; border-radius: 4px; display: block"><span style="position: absolute; left: -8px; top: -8px; width: 34px; height: 34px; border-radius: 17px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; border: 2px solid #FFFFFF">02</span></span>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.3; color: #1F2A44; grid-column: 2 / 4">Mains et traditions</span>
+    <span style="align-self: end; justify-self: start; background: #F20C49; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 3px 14px; border-radius: 10px">Culture & Traditions</span>
+    <span style="align-self: end; text-align: right; line-height: 1.1"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #1E1E24">35 €</span><span style="font-size: 10px; color: #3C3C44">/ pers</span></span>
+  </a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #5E5E66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F20C49" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l-3 2" stroke-linecap="round"></path></svg>9h30 à 19h00<span style="flex: 1"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="#1E1E24" aria-hidden="true"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1v2h-3v-2H8v2H5v-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 3v5h12V6zm1.5 7.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm9 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"></path></svg><button type="button" aria-label="Ajouter Mains et traditions aux favoris" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E24" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px 14px 10px; box-shadow: 0 6px 10px rgba(30,30,36,0.2)">
+  <a href="#ecran-circuit" style="display: grid; grid-template-columns: 104px 1fr auto; gap: 4px 12px; text-decoration: none; color: inherit">
+    <span style="position: relative; grid-row: 1 / 3"><img src="circ3.jpg" alt="" style="width: 104px; height: 92px; object-fit: cover; border-radius: 4px; display: block"><span style="position: absolute; left: -8px; top: -8px; width: 34px; height: 34px; border-radius: 17px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; border: 2px solid #FFFFFF">03</span></span>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.3; color: #1F2A44; grid-column: 2 / 4">Graffitis, fort et fantômes</span>
+    <span style="align-self: end; justify-self: start; background: #F20C49; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 3px 14px; border-radius: 10px">Street & Art</span>
+    <span style="align-self: end; text-align: right; line-height: 1.1"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #1E1E24">26 €</span><span style="font-size: 10px; color: #3C3C44">/ pers</span></span>
+  </a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #5E5E66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F20C49" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l-3 2" stroke-linecap="round"></path></svg>9h30 à 19h00<span style="flex: 1"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="#1E1E24" aria-hidden="true"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1v2h-3v-2H8v2H5v-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 3v5h12V6zm1.5 7.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm9 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"></path></svg><button type="button" aria-label="Ajouter Graffitis, fort et fantômes aux favoris" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E24" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px 14px 10px; box-shadow: 0 6px 10px rgba(30,30,36,0.2)">
+  <a href="#" style="display: grid; grid-template-columns: 104px 1fr auto; gap: 4px 12px; text-decoration: none; color: inherit">
+    <span style="position: relative; grid-row: 1 / 3"><img src="circ4.jpg" alt="" style="width: 104px; height: 92px; object-fit: cover; border-radius: 4px; display: block"><span style="position: absolute; left: -8px; top: -8px; width: 34px; height: 34px; border-radius: 17px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; border: 2px solid #FFFFFF">04</span></span>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.3; color: #1F2A44; grid-column: 2 / 4">Praga, du crépuscule à minuit</span>
+    <span style="align-self: end; justify-self: start; background: #F20C49; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 3px 14px; border-radius: 10px">Vie nocturne</span>
+    <span style="align-self: end; text-align: right; line-height: 1.1"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #1E1E24">25 €</span><span style="font-size: 10px; color: #3C3C44">/ pers</span></span>
+  </a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #5E5E66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F20C49" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l-3 2" stroke-linecap="round"></path></svg>9h30 à 19h00<span style="flex: 1"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="#1E1E24" aria-hidden="true"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1v2h-3v-2H8v2H5v-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 3v5h12V6zm1.5 7.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm9 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"></path></svg><button type="button" aria-label="Ajouter Praga, du crépuscule à minuit aux favoris" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E24" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px 14px 10px; box-shadow: 0 6px 10px rgba(30,30,36,0.2)">
+  <a href="#" style="display: grid; grid-template-columns: 104px 1fr auto; gap: 4px 12px; text-decoration: none; color: inherit">
+    <span style="position: relative; grid-row: 1 / 3"><img src="circ5.jpg" alt="" style="width: 104px; height: 92px; object-fit: cover; border-radius: 4px; display: block"><span style="position: absolute; left: -8px; top: -8px; width: 34px; height: 34px; border-radius: 17px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; border: 2px solid #FFFFFF">05</span></span>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.3; color: #1F2A44; grid-column: 2 / 4">Zapiekanki et quais d'été</span>
+    <span style="align-self: end; justify-self: start; background: #F20C49; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 3px 14px; border-radius: 10px">Street food</span>
+    <span style="align-self: end; text-align: right; line-height: 1.1"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #1E1E24">26 €</span><span style="font-size: 10px; color: #3C3C44">/ pers</span></span>
+  </a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #5E5E66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F20C49" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l-3 2" stroke-linecap="round"></path></svg>9h30 à 19h00<span style="flex: 1"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="#1E1E24" aria-hidden="true"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1v2h-3v-2H8v2H5v-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 3v5h12V6zm1.5 7.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm9 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"></path></svg><button type="button" aria-label="Ajouter Zapiekanki et quais d'été aux favoris" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E24" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px 14px 10px; box-shadow: 0 6px 10px rgba(30,30,36,0.2)">
+  <a href="#" style="display: grid; grid-template-columns: 104px 1fr auto; gap: 4px 12px; text-decoration: none; color: inherit">
+    <span style="position: relative; grid-row: 1 / 3"><img src="circ6.jpg" alt="" style="width: 104px; height: 92px; object-fit: cover; border-radius: 4px; display: block"><span style="position: absolute; left: -8px; top: -8px; width: 34px; height: 34px; border-radius: 17px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 14px; border: 2px solid #FFFFFF">06</span></span>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.3; color: #1F2A44; grid-column: 2 / 4">Le dimanche des chineurs</span>
+    <span style="align-self: end; justify-self: start; background: #F20C49; color: #FFFFFF; font-size: 12px; font-weight: 600; padding: 3px 14px; border-radius: 10px">Lieux insolites</span>
+    <span style="align-self: end; text-align: right; line-height: 1.1"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; color: #1E1E24">25 €</span><span style="font-size: 10px; color: #3C3C44">/ pers</span></span>
+  </a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: #5E5E66"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F20C49" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l-3 2" stroke-linecap="round"></path></svg>9h30 à 19h00<span style="flex: 1"></span><svg width="20" height="20" viewBox="0 0 24 24" fill="#1E1E24" aria-hidden="true"><path d="M5 3h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1v2h-3v-2H8v2H5v-2a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1zm1 3v5h12V6zm1.5 7.5a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6zm9 0a1.3 1.3 0 1 0 0 2.6 1.3 1.3 0 0 0 0-2.6z"></path></svg><button type="button" aria-label="Ajouter Le dimanche des chineurs aux favoris" style="width: 44px; height: 44px; border: 0; background: transparent; display: flex; align-items: center; justify-content: center; padding: 0"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1E1E24" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></button></div>
+</li></ul>
+  <div style="margin-top: 26px"><a href="#ecran-villes" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85);">Retour</a></div>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Piękne !, veut dire C'est beau !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 72px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Piękne !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= C'est beau !</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-circuit" aria-label="circuit">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-varsovie" aria-label="Retour à Varsovie" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 22px 0 200px">
+  <div style="padding: 0 22px 22px"><a href="#" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85); text-decoration: underline;">Voir sur Google Maps</a></div>
+  <div style="display: flex; align-items: stretch">
+    <aside style="width: 150px; flex-shrink: 0; background: #F20C49; color: #FFFFFF; padding: 22px 14px; box-sizing: border-box; display: flex; flex-direction: column; gap: 18px">
+      <div><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px">03</div><h1 style="margin: 4px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px; line-height: 1.25">Graffitis, fort et fantômes</h1></div>
+      <p style="margin: 0; font-size: 13.5px; font-weight: 700; line-height: 1.4">Un fort tsariste abandonné devenu spot de graffiti, puis les fresques de Mokotów et une villa hantée.</p>
+      <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 700"><li style="display: flex; align-items: center; gap: 8px"><span style="width: 22px; height: 5px; border-radius: 3px; background: #FFFFFF; flex-shrink: 0"></span>3 · Street art</li><li style="display: flex; align-items: center; gap: 8px"><span style="width: 22px; height: 5px; border-radius: 3px; background: #FFFFFF; flex-shrink: 0"></span>1 · Mystères & légendes</li><li style="display: flex; align-items: center; gap: 8px"><span style="width: 22px; height: 5px; border-radius: 3px; background: #FFFFFF; flex-shrink: 0"></span>1 · Street food</li></ul>
+      <div style="font-size: 14px; font-weight: 700">09h30 – 19h00<br>Bus et tram</div>
+      <div style="flex: 1"></div>
+      <div><div style="font-size: 14px; font-weight: 700">Prix</div><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px">26 € <span style="font-size: 14px; font-weight: 600">/ pers</span></div></div>
+    </aside>
+    <ol style="list-style: none; margin: 0; padding: 0 22px 0 14px; flex: 1; display: flex; flex-direction: column; gap: 22px"><li style="background: #FFFFFF; border: 1.5px solid #F20C49; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4"><strong style="font-family: 'Poppins', sans-serif; color: #C8093C; display: block">09h30 – Fort Bema, à Bemowo.</strong>Fort abandonné dans un parc, devenu haut lieu du graffiti, rarement visité.</li><li style="background: #F2C7C9; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4"><strong style="font-family: 'Poppins', sans-serif; display: block">12h00 – 13h30</strong>Pique-nique dans le parc du fort</li><li style="background: #FFFFFF; border: 1.5px solid #F20C49; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4"><strong style="font-family: 'Poppins', sans-serif; color: #C8093C; display: block">14h30 – « Mechanical Centaur », 37 rue Dolna.</strong>La fresque monumentale de Pixel Pancho, à Mokotów.</li><li style="background: #FFFFFF; border: 1.5px solid #F20C49; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4"><strong style="font-family: 'Poppins', sans-serif; color: #C8093C; display: block">15h15 – La villa du 5 rue Morskie Oko.</strong>La légende de l'apparition de Hanna. Villa privée, vue depuis la rue.</li><li style="background: #FFFFFF; border: 1.5px solid #F20C49; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4"><strong style="font-family: 'Poppins', sans-serif; color: #C8093C; display: block">16h00 – Fresque du 2C rue Rakowiecka.</strong>Une œuvre de quartier sur un mur d'immeuble.</li><li style="background: #FFFFFF; border: 1.5px solid #F20C49; border-radius: 12px; padding: 12px 14px; font-size: 14px; line-height: 1.4"><strong style="font-family: 'Poppins', sans-serif; color: #C8093C; display: block">17h30 – Hala Koszyki.</strong>L'ancienne halle de marché où les Varsoviens se retrouvent pour manger.</li></ol>
+  </div>
+  <div style="display: flex; gap: 14px; padding: 30px 22px 0; flex-wrap: wrap"><a href="#ecran-date" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85);">Réserver</a><a href="#ecran-guides" style="height: 48px; padding: 0 22px; border-radius: 14px; background: #FFFFFF; border: 2px solid #F20C49; color: #1E1E24; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(30,30,36,0.18);">Choisir mon guide</a></div>
+  <div style="padding: 18px 22px 0"><a href="#ecran-varsovie" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85);">Retour</a></div>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Chodźmy !, veut dire Allons-y !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 81px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Chodźmy !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Allons-y !</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-guides" aria-label="guides">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-circuit" aria-label="Retour au circuit" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<div style="flex-shrink: 0; padding: 16px 22px 8px; display: flex; flex-direction: column; gap: 10px">
+  <div style="display: flex; align-items: center; justify-content: space-between">
+    <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Les guides</h1>
+    <button type="button" aria-label="Ouvrir les filtres" style="height: 44px; padding: 0 16px; border-radius: 22px; border: 2px solid #F20C49; background: #FFFFFF; color: #C8093C; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 14px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>Filtres</button>
+  </div>
+  <div class="scroll" role="group" aria-label="Filtrer par ville" style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 -22px; padding: 0 22px"><button type="button" aria-pressed="true" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 18px; border: 0; background: #1E1E24; color: #FFFFFF; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 13px">Toutes les villes</button><button type="button" aria-pressed="false" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #E4E4E0; background: #FFFFFF; color: #3C3C44; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 13px">Varsovie</button><button type="button" aria-pressed="false" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #E4E4E0; background: #FFFFFF; color: #3C3C44; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 13px">Cracovie</button><button type="button" aria-pressed="false" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #E4E4E0; background: #FFFFFF; color: #3C3C44; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 13px">Gdańsk</button><button type="button" aria-pressed="false" style="flex-shrink: 0; height: 36px; padding: 0 14px; border-radius: 18px; border: 1.5px solid #E4E4E0; background: #FFFFFF; color: #3C3C44; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 13px">Zakopane</button></div>
+</div>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 8px 22px 200px">
+  <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 18px"><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#ecran-profil" aria-label="Voir le profil de Marek" style="flex-shrink: 0"><img src="marek.jpg" alt="" style="width: 84px; height: 84px; border-radius: 42px; object-fit: cover; display: block; flex-shrink: 0"></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#ecran-profil" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">MAREK<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Street Art & histoire de Varsovie · <strong style="color: #C8093C">Varsovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,9 · 128 avis</div>
+    </div>
+  </div>
+  <a href="#ecran-messages" aria-label="Écrire à Marek" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible demain</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Monika" style="flex-shrink: 0"><img src="monika.jpg" alt="" style="width: 84px; height: 84px; border-radius: 42px; object-fit: cover; display: block; flex-shrink: 0"></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Monika<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Food & bars mleczne · <strong style="color: #C8093C">Varsovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,6 · 105 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Monika" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible demain</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Kaśka" style="flex-shrink: 0"><img src="kaska.jpg" alt="" style="width: 84px; height: 84px; border-radius: 42px; object-fit: cover; display: block; flex-shrink: 0"></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Kaśka<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Vie nocturne et musique · <strong style="color: #C8093C">Varsovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,5 · 109 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Kaśka" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible samedi</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Grzesiek" style="flex-shrink: 0"><img src="grzesiek.jpg" alt="" style="width: 84px; height: 84px; border-radius: 42px; object-fit: cover; display: block; flex-shrink: 0"></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Grzesiek<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Lieux insolites & photo · <strong style="color: #C8093C">Varsovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,8 · 87 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Grzesiek" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible demain</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Alicja" style="flex-shrink: 0"><span aria-hidden="true" style="width: 84px; height: 84px; border-radius: 42px; background: #F2AC29; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; flex-shrink: 0">A</span></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Alicja<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Culture & traditions · <strong style="color: #C8093C">Varsovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,7 · 92 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Alicja" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible mardi</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Tomek" style="flex-shrink: 0"><img src="tomek.jpg" alt="" style="width: 84px; height: 84px; border-radius: 42px; object-fit: cover; display: block; flex-shrink: 0"></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Tomek<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Mystères & légendes · <strong style="color: #C8093C">Varsovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,6 · 74 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Tomek" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible lundi</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Zofia" style="flex-shrink: 0"><span aria-hidden="true" style="width: 84px; height: 84px; border-radius: 42px; background: #3D6BB3; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; flex-shrink: 0">Z</span></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Zofia<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Wawel & légende du dragon · <strong style="color: #C8093C">Cracovie</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,9 · 64 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Zofia" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible demain</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Piotr" style="flex-shrink: 0"><span aria-hidden="true" style="width: 84px; height: 84px; border-radius: 42px; background: #2F8F5B; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; flex-shrink: 0">P</span></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Piotr<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Ambre, port & Solidarność · <strong style="color: #C8093C">Gdańsk</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,8 · 51 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Piotr" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible jeudi</span></div>
+</li><li style="position: relative; border: 2px solid #F20C49; border-radius: 16px; background: #FFFFFF; padding: 14px; box-shadow: 0 4px 10px rgba(30,30,36,0.12)">
+  <div style="display: flex; gap: 14px; align-items: center">
+    <a href="#" aria-label="Voir le profil de Ania" style="flex-shrink: 0"><span aria-hidden="true" style="width: 84px; height: 84px; border-radius: 42px; background: #8A4FC7; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; flex-shrink: 0">A</span></a>
+    <div style="flex: 1; min-width: 0">
+      <a href="#" style="display: flex; align-items: center; gap: 6px; text-decoration: none; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">Ania<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></a>
+      <div style="font-size: 14px; color: #3C3C44">Randonnée Tatras & culture góral · <strong style="color: #C8093C">Zakopane</strong></div>
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 14px; margin-top: 2px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>5,0 · 38 avis</div>
+    </div>
+  </div>
+  <a href="#" aria-label="Écrire à Ania" style="position: absolute; top: 8px; right: 8px; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center"><svg width="30" height="30" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="#F20C49"></path></svg></a>
+  <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px"><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">FR</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">EN</span><span style="width: 40px; height: 32px; border-radius: 8px; background: #EFEFEF; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700">PL</span><span style="flex: 1"></span><span style="background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 7px 12px; border-radius: 8px">Disponible samedi</span></div>
+</li></ul>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Przewodnik !, veut dire Le guide. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 108px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Przewodnik !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Le guide</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-profil" aria-label="profil">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-guides" aria-label="Retour aux guides" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 22px 22px 200px">
+  <div style="display: flex; flex-direction: column; align-items: center; text-align: center">
+    <img src="marek.jpg" alt="Marek, guide à Varsovie" style="width: 130px; height: 130px; border-radius: 65px; object-fit: cover; border: 4px solid #F20C49">
+    <h1 style="margin: 12px 0 0; display: flex; align-items: center; gap: 6px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px">MAREK<svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z" fill="#1D9BF0"></path><path d="M8 12.3l2.6 2.6L16.2 9" stroke="#FFFFFF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg></h1>
+    <div style="font-size: 15px; color: #3C3C44">Guide passionné · Varsovie</div>
+    <div style="display: flex; align-items: center; gap: 6px; margin-top: 4px; font-size: 14px"><svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A13B" aria-hidden="true"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z"></path></svg>4,9 · 128 avis</div>
+  </div>
+  <div style="display: flex; gap: 10px; margin-top: 18px"><div style="flex: 1; text-align: center; border: 1.5px solid #E4E4E0; border-radius: 14px; padding: 10px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; color: #C8093C">6 ans</div><div style="font-size: 12px; color: #5E5E66">de visites</div></div><div style="flex: 1; text-align: center; border: 1.5px solid #E4E4E0; border-radius: 14px; padding: 10px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; color: #C8093C">3</div><div style="font-size: 12px; color: #5E5E66">circuits</div></div><div style="flex: 1; text-align: center; border: 1.5px solid #E4E4E0; border-radius: 14px; padding: 10px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; color: #C8093C">3</div><div style="font-size: 12px; color: #5E5E66">langues</div></div></div>
+  <h2 style="margin: 24px 0 8px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px">Qui est Marek ?</h2>
+  <p style="margin: 0 0 10px; font-size: 14.5px; line-height: 1.55">Varsovien de cœur, je suis passionné d'art urbain. Je connais les fresques cachées derrière les porches et les artistes du quartier. Avec moi, tu découvres la ville comme un habitant, loin des circuits touristiques.</p>
+  <p style="margin: 0 0 10px; font-size: 14.5px; line-height: 1.55">Né à Praga, le quartier artiste de la rive droite, j'ai grandi entre les vieilles cours d'immeubles et les ateliers. Après des études d'histoire de l'art, j'ai commencé à faire visiter ma ville à des amis étrangers… et je ne me suis jamais arrêté.</p>
+  <p style="margin: 0; font-size: 14.5px; line-height: 1.55">Mes visites se font à ton rythme, toujours avec une pause gourmande : pierogi, pączki ou café dans mon bar à lait préféré.</p>
+  <h2 style="margin: 24px 0 8px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px">Langues parlées</h2>
+  <div style="display: flex; gap: 8px"><span style="padding: 7px 14px; border-radius: 8px; background: #EFEFEF; font-size: 14px; font-weight: 700">Français</span><span style="padding: 7px 14px; border-radius: 8px; background: #EFEFEF; font-size: 14px; font-weight: 700">Anglais</span><span style="padding: 7px 14px; border-radius: 8px; background: #EFEFEF; font-size: 14px; font-weight: 700">Polonais</span></div>
+  <h2 style="margin: 24px 0 8px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px">Ses visites en photos</h2>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px"><img src="circ3.jpg" alt="" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px; display: block"><img src="circ2.jpg" alt="" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px; display: block"><img src="circ6.jpg" alt="" style="width: 100%; height: 100px; object-fit: cover; border-radius: 10px; display: block"></div>
+  <h2 style="margin: 24px 0 8px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px">Avis des voyageurs</h2>
+  <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px"><li style="border: 1.5px solid #E4E4E0; border-radius: 14px; padding: 14px"><div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 20px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700">C</span><div><div style="font-weight: 800">Camille</div><div style="font-size: 12px; color: #5E5E66">France · septembre 2026 · Graffitis, fort et fantômes</div></div></div><p style="margin: 10px 0 0; font-size: 14px; line-height: 1.45">Marek connaît chaque cour cachée de Varsovie ! Visite passionnante, je recommande à 100 %.</p></li><li style="border: 1.5px solid #E4E4E0; border-radius: 14px; padding: 14px"><div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 20px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700">L</span><div><div style="font-weight: 800">Lucas</div><div style="font-size: 12px; color: #5E5E66">France · août 2026 · Mains et traditions</div></div></div><p style="margin: 10px 0 0; font-size: 14px; line-height: 1.45">Super guide, drôle et très cultivé. Il nous a même présenté un artiste du quartier. On a vraiment vu la ville comme un habitant.</p></li><li style="border: 1.5px solid #E4E4E0; border-radius: 14px; padding: 14px"><div style="display: flex; align-items: center; gap: 10px"><span aria-hidden="true" style="width: 40px; height: 40px; border-radius: 20px; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; font-weight: 700">S</span><div><div style="font-weight: 800">Sophia</div><div style="font-size: 12px; color: #5E5E66">Belgique · juillet 2026 · Le dimanche des chineurs</div></div></div><p style="margin: 10px 0 0; font-size: 14px; line-height: 1.45">Parfait pour les amoureux d'art urbain. Marek parle très bien français.</p></li></ul>
+  <div style="display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap"><a href="#ecran-date" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85);">Réserver avec Marek</a><a href="#ecran-messages" style="height: 48px; padding: 0 22px; border-radius: 14px; background: #FFFFFF; border: 2px solid #F20C49; color: #1E1E24; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(30,30,36,0.18);">Écrire</a></div>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Przewodnik !, veut dire Le guide. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 108px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Przewodnik !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Le guide</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-date" aria-label="date">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-circuit" aria-label="Retour au circuit" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 20px 22px 200px">
+  <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px">Réserver avec Marek</h1>
+  <div style="font-size: 14px; color: #5E5E66; margin-top: 2px">Graffitis, fort et fantômes · Varsovie</div>
+  <span style="display: inline-block; margin-top: 10px; background: #E6F4EA; color: #14532D; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 8px">Réservation immédiate</span>
+  <h2 style="margin: 22px 0 10px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px">1. Quand veux-tu partir ?</h2>
+  <div style="display: flex; gap: 10px"><a href="#" style="height: 48px; padding: 0 22px; border-radius: 14px; background: #FFFFFF; border: 2px solid #F20C49; color: #1E1E24; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(30,30,36,0.18); height: 42px;">Aujourd'hui</a><a href="#" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85); height: 42px; box-shadow: none;">Demain</a></div>
+  <div style="font-size: 13px; font-weight: 700; color: #5E5E66; margin: 14px 0 8px">Ou une autre date · octobre 2026</div>
+  <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px"><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">lun.</span><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">mar.</span><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">mer.</span><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">jeu.</span><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">ven.</span><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">sam.</span><span style="text-align: center; font-size: 12px; font-weight: 700; color: #5E5E66">dim.</span><span></span><span></span><span></span><button type="button" aria-label="1 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">1</button><button type="button" aria-label="2 octobre (complet)" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #F2F2F0; color: #8A8A92; text-decoration: line-through;">2</button><button type="button" aria-label="3 octobre (complet)" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #F2F2F0; color: #8A8A92; text-decoration: line-through;">3</button><button type="button" aria-label="4 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">4</button><button type="button" aria-label="5 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">5</button><button type="button" aria-label="6 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">6</button><button type="button" aria-label="7 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">7</button><button type="button" aria-label="8 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">8</button><button type="button" aria-label="9 octobre (complet)" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #F2F2F0; color: #8A8A92; text-decoration: line-through;">9</button><button type="button" aria-label="10 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">10</button><button type="button" aria-label="11 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">11</button><button type="button" aria-label="12 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">12</button><button type="button" aria-label="13 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">13</button><button type="button" aria-label="14 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">14</button><button type="button" aria-label="15 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">15</button><button type="button" aria-label="16 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">16</button><button type="button" aria-label="17 octobre (complet)" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #F2F2F0; color: #8A8A92; text-decoration: line-through;">17</button><button type="button" aria-label="18 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">18</button><button type="button" aria-label="19 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">19</button><button type="button" aria-label="20 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">20</button><button type="button" aria-label="21 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">21</button><button type="button" aria-label="22 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">22</button><button type="button" aria-label="23 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">23</button><button type="button" aria-label="24 octobre (complet)" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #F2F2F0; color: #8A8A92; text-decoration: line-through;">24</button><button type="button" aria-label="25 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">25</button><button type="button" aria-label="26 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">26</button><button type="button" aria-label="27 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">27</button><button type="button" aria-label="28 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">28</button><button type="button" aria-label="29 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #E6F4EA; color: #14532D;">29</button><button type="button" aria-label="30 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #FFFFFF; color: #1E1E24; border: 2px solid #1E1E24;">30</button><button type="button" aria-label="31 octobre" style="height: 40px; border: 0; border-radius: 10px; font-family: 'Nunito Sans', sans-serif; font-weight: 700; font-size: 14px; box-sizing: border-box; background: #F20C49; color: #FFFFFF;">31</button></div>
+  <div style="display: flex; gap: 16px; margin-top: 10px; font-size: 12.5px; color: #3C3C44"><span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #E6F4EA"></span>Marek est libre</span><span style="display: flex; align-items: center; gap: 6px"><span style="width: 14px; height: 14px; border-radius: 4px; background: #F2F2F0"></span>Complet</span></div>
+  <h2 style="margin: 22px 0 10px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px">2. Combien de personnes ?</h2>
+  <div style="display: flex; align-items: center; gap: 18px">
+    <button type="button" aria-label="Une personne de moins" style="width: 44px; height: 44px; border-radius: 22px; border: 2px solid #F20C49; background: #FFFFFF; color: #C8093C; font-size: 22px; font-weight: 700">–</button>
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">2</span>
+    <button type="button" aria-label="Une personne de plus" style="width: 44px; height: 44px; border-radius: 22px; border: 0; background: #F20C49; color: #FFFFFF; font-size: 22px; font-weight: 700">+</button>
+  </div>
+  <div style="margin-top: 22px; border: 2px solid #F20C49; border-radius: 16px; padding: 14px 16px">
+    <div style="display: flex; justify-content: space-between; font-size: 14px"><span>Demain · 9h30</span><span>26 € × 2 personnes</span></div>
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 8px"><span style="font-weight: 800">Total</span><span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px">52 €</span></div>
+  </div>
+  <div style="margin-top: 18px"><a href="#ecran-paiement" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85); width: 100%; box-sizing: border-box;">Réserver et payer 52 €</a></div>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Ile kosztuje ?, veut dire Combien ça coûte ?. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 126px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Ile kosztuje ?"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Combien ça coûte ?</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-paiement" aria-label="paiement">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-date" aria-label="Retour à la date" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 20px 22px 200px; display: flex; flex-direction: column; gap: 14px">
+  <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px">Paiement</h1>
+  <div style="border: 2px solid #F20C49; border-radius: 16px; padding: 14px 16px; font-size: 14px; line-height: 1.5">
+    <strong style="font-family: 'Poppins', sans-serif">Graffitis, fort et fantômes · Varsovie</strong><br>Demain · 9h30 · avec Marek<br>26 € × 2 personnes
+    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px"><span style="font-weight: 800">Total</span><span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">52 €</span></div>
+  </div>
+  <button type="button" style="height: 52px; border-radius: 14px; border: 0; background: #1E1E24; color: #FFFFFF; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px">Payer avec Apple Pay</button>
+  <button type="button" style="height: 52px; border-radius: 14px; border: 2px solid #1E1E24; background: #FFFFFF; color: #1E1E24; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 16px">Payer avec Google Pay</button>
+  <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #5E5E66"><span style="flex: 1; height: 1px; background: #E4E4E0"></span>ou par carte<span style="flex: 1; height: 1px; background: #E4E4E0"></span></div>
+  <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #3C3C44">Numéro de carte<input type="text" placeholder="0000 0000 0000 0000" autocomplete="off" style="height: 50px; border: 0; border-radius: 12px; background: #F4F4F4; padding: 0 14px; font-family: 'Nunito Sans', sans-serif; font-size: 15px; color: #1E1E24; box-sizing: border-box; width: 100%"></label>
+  <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #3C3C44">Nom sur la carte<input type="text" placeholder="Inès Chartier" autocomplete="off" style="height: 50px; border: 0; border-radius: 12px; background: #F4F4F4; padding: 0 14px; font-family: 'Nunito Sans', sans-serif; font-size: 15px; color: #1E1E24; box-sizing: border-box; width: 100%"></label>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px"><label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #3C3C44">Expiration<input type="text" placeholder="MM/AA" autocomplete="off" style="height: 50px; border: 0; border-radius: 12px; background: #F4F4F4; padding: 0 14px; font-family: 'Nunito Sans', sans-serif; font-size: 15px; color: #1E1E24; box-sizing: border-box; width: 100%"></label><label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 700; color: #3C3C44">CVC<input type="text" placeholder="123" autocomplete="off" style="height: 50px; border: 0; border-radius: 12px; background: #F4F4F4; padding: 0 14px; font-family: 'Nunito Sans', sans-serif; font-size: 15px; color: #1E1E24; box-sizing: border-box; width: 100%"></label></div>
+  <a href="#ecran-confirmation" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85); width: 100%; box-sizing: border-box; margin-top: 6px;">Payer 52 €</a>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Płacę !, veut dire Je paie !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 63px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Płacę !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Je paie !</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-confirmation" aria-label="confirmation">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="position: relative; z-index: 5; height: 132px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: flex-start; gap: 6px; padding: 18px 22px 0 10px; box-sizing: border-box">
+  <a href="#ecran-paiement" aria-label="Retour au paiement" style="width: 44px; height: 44px; margin-top: 4px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+  </a>
+  <div style="display: flex; flex-direction: column; align-items: center">
+    <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 34px; letter-spacing: -1px; color: #FFFFFF; line-height: 1">sonigo</span>
+    <span style="font-size: 7.5px; font-weight: 700; letter-spacing: 2px; color: #FFFFFF; margin-top: 4px">— TOURISME EN POLOGNE —</span>
+  </div>
+</header>
+<main style="flex: 1; padding: 40px 30px 110px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px">
+  <span aria-hidden="true" style="width: 96px; height: 96px; border-radius: 48px; background: #F20C49; display: flex; align-items: center; justify-content: center"><svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span>
+  <h1 style="margin: 8px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px">Paiement confirmé</h1>
+  <p style="margin: 0; font-size: 18px; font-weight: 700">Marek t'attend demain à 9h30</p>
+  <p style="margin: 0; font-size: 15px; line-height: 1.5; color: #3C3C44">Réservation confirmée pour 2 personnes<br>Circuit 03 · Graffitis, fort et fantômes</p>
+  <p style="margin: 0; font-size: 14px; color: #5E5E66">Justificatif envoyé par e-mail.</p>
+  <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 14px; width: 100%; align-items: center"><a href="#ecran-messages" style="height: 48px; padding: 0 24px; border-radius: 14px; background: #F20C49; color: #FFFFFF; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-shadow: 0 5px 0 rgba(30,30,36,0.85); width: 260px;">Écrire à Marek</a><a href="#ecran-deconnexion" style="height: 48px; padding: 0 22px; border-radius: 14px; background: #FFFFFF; border: 2px solid #F20C49; color: #1E1E24; display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px; box-sizing: border-box; box-shadow: 0 4px 10px rgba(30,30,36,0.18); width: 260px;">Se déconnecter</a></div>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Dziękuję !, veut dire Merci !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 80px; top: 76px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 90px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Dziękuję !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Merci !</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 14px; top: 24px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 122px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-messages" aria-label="messages">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px">
+<header style="height: 96px; flex-shrink: 0; background: #F20C49; border-radius: 0 0 28px 28px; display: flex; align-items: center; gap: 12px; padding: 0 20px 0 8px">
+  <a href="#ecran-confirmation" aria-label="Retour" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+  <img src="marek.jpg" alt="" style="width: 48px; height: 48px; border-radius: 24px; object-fit: cover; border: 2px solid #FFFFFF">
+  <div style="color: #FFFFFF"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px">Marek</div><div style="font-size: 13px; display: flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #7CF2A0"></span>En ligne</div></div>
+</header>
+<main class="scroll" style="flex: 1; overflow-y: auto; scrollbar-width: none; padding: 16px 18px 12px">
+  <div style="text-align: center; font-size: 12px; font-weight: 700; color: #8A8A92; margin-bottom: 12px">Aujourd'hui</div>
+  <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px"><li style="align-self: flex-end; max-width: 78%; background: #F20C49; color: #FFFFFF; border-radius: 18px 18px 4px 18px; padding: 10px 14px; font-size: 14.5px; line-height: 1.4">Bonjour Marek, j’ai réservé la visite Graffitis, fort et fantômes de demain. Où est-ce qu’on se retrouve ?</li><li style="align-self: flex-start; max-width: 78%; background: #F2F2F0; color: #1E1E24; border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 14.5px; line-height: 1.4">Cześć Inès, super ! On se retrouve demain au Plac Zbawiciela (la place du Saint-Sauveur).</li><li style="align-self: flex-start; max-width: 78%; background: #F2F2F0; color: #1E1E24; border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 14.5px; line-height: 1.4">As-tu quelques requêtes particulières avant notre rencontre ?</li><li style="align-self: flex-end; max-width: 78%; background: #F20C49; color: #FFFFFF; border-radius: 18px 18px 4px 18px; padding: 10px 14px; font-size: 14.5px; line-height: 1.4">Non, rien de spécial pour l’instant… Parfait ! J’ai hâte d’y être.</li><li style="align-self: flex-end; max-width: 78%; background: #F20C49; color: #FFFFFF; border-radius: 18px 18px 4px 18px; padding: 10px 14px; font-size: 14.5px; line-height: 1.4">À demain Marek</li><li style="align-self: flex-start; max-width: 78%; background: #F2F2F0; color: #1E1E24; border-radius: 18px 18px 18px 4px; padding: 10px 14px; font-size: 14.5px; line-height: 1.4">Parfait ! À demain Inès</li></ul>
+</main>
+<div style="flex-shrink: 0; display: flex; gap: 10px; padding: 10px 18px 90px; border-top: 1px solid #E4E4E0">
+  <label style="flex: 1; display: flex"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Ton message</span><input type="text" placeholder="Écris ton message…" style="flex: 1; height: 46px; border: 0; border-radius: 23px; background: #F2F2F0; padding: 0 16px; font-family: 'Nunito Sans', sans-serif; font-size: 15px"></label>
+  <button type="button" aria-label="Envoyer" style="width: 46px; height: 46px; border-radius: 23px; border: 0; background: #F20C49; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5 21 12 3 3.5v6.5l11 2-11 2z"></path></svg></button>
+</div>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Do zobaczenia !, veut dire À bientôt !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; right: 66px; top: 20px; display: block; text-decoration: none; background: #FFFFFF; border-radius: 16px; padding: 6px 12px 7px; box-shadow: 0 6px 16px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 135px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Do zobaczenia !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 14px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 12px; font-weight: 700; color: #3C3C44; white-space: nowrap">= À bientôt !</span>
+  <svg width="20" height="16" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -11px; bottom: 6px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; right: 6px; top: 2px; display: block"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 94px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 8px 10px rgba(0,0,0,0.22))"></a>
+<nav aria-label="Navigation principale" style="position: absolute; z-index: 20; left: 0; right: 0; bottom: 0; height: 74px; background: #F20C49; border-radius: 22px 22px 0 0; display: flex; align-items: center; justify-content: space-around; padding: 0 10px">
+  <a href="#ecran-villes" aria-label="Accueil" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 11 12 3.5 21 11v9a1 1 0 0 1-1 1h-5.5v-6h-5v6H4a1 1 0 0 1-1-1z"></path></svg></a>
+  <a href="#ecran-varsovie" aria-label="Explorer" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="#FFFFFF"></circle><path d="M15.5 8.5 13 13l-4.5 2.5L11 11z" fill="#F20C49"></path></svg></a>
+  <a href="#" aria-label="Favoris" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; color: #FFFFFF"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"></path></svg></a>
+  <a href="#ecran-messages" aria-label="Profil d'Inès" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center"><img src="ines.jpg" alt="" style="width: 44px; height: 44px; border-radius: 22px; object-fit: cover; border: 2px solid #FFFFFF; box-sizing: border-box"></a>
+</nav>
+</div>
+</section>
+<section class="screen" id="ecran-deconnexion" aria-label="deconnexion">
+<div style="width: 440px; height: 956px; box-sizing: border-box; position: relative; overflow: hidden; background: #FFFFFF; font-family: 'Nunito Sans', sans-serif; color: #1E1E24">
+<div style="display: flex; flex-direction: column; height: 956px; background: #F20C49">
+<main style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #FFFFFF; text-align: center; padding: 0 30px">
+  <span style="font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 52px; letter-spacing: -1.5px; line-height: 1">sonigo</span>
+  <span style="font-size: 10px; font-weight: 700; letter-spacing: 3px">— TOURISME EN POLOGNE —</span>
+  <h1 style="margin: 40px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px">Bonne visite Inès</h1>
+  <p style="margin: 0; font-size: 20px; font-weight: 700">À bientôt</p>
+  <div style="margin-top: 30px"><a href="#ecran-accueil" style="height: 50px; padding: 0 28px; border-radius: 14px; background: #FFFFFF; color: #C8093C; display: inline-flex; align-items: center; text-decoration: none; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 15px">Revenir à l'accueil</a></div>
+</main>
+</div>
+<a href="#ecran-smok" class="bulle" aria-label="Smok t'apprend le polonais : Do widzenia !, prononcé do vidzègna, veut dire Au revoir !. Ouvrir la discussion avec Smok" style="position: absolute; z-index: 30; display: block; text-decoration: none; right: 150px; top: 690px; background: #FFFFFF; border-radius: 18px; padding: 9px 14px 10px; box-shadow: 0 8px 22px rgba(120,10,40,0.28); transform-origin: 100% 100%">
+  <span aria-hidden="true" style="display: block; min-width: 130px; white-space: nowrap; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; line-height: 1.2; color: #C8093C"><span class="ty" data-full="Do widzenia !"></span><span class="curseur" style="display: inline-block; width: 2px; height: 16px; margin-left: 2px; vertical-align: -2px; background: #C8093C; opacity: 1"></span></span>
+  <span aria-hidden="true" style="display: block; font-size: 11.5px; font-weight: 700; color: #8A8A92; white-space: nowrap">[do vidzègna]</span>
+  <span aria-hidden="true" style="display: block; font-size: 12.5px; font-weight: 700; color: #3C3C44; white-space: nowrap">= Au revoir !</span>
+  
+  <svg width="22" height="18" viewBox="0 0 22 18" aria-hidden="true" style="position: absolute; right: -12px; bottom: 8px; display: block"><path d="M0 2 C 8 4, 14 2, 22 16 C 14 13, 6 14, 0 12 Z" fill="#FFFFFF"></path></svg>
+</a>
+<a href="#ecran-smok" aria-label="Discuter avec Smok pour apprendre le polonais" style="position: absolute; z-index: 29; display: block; right: 20px; top: 660px;"><img class="smok" src="smok.png" alt="" aria-hidden="true" style="display: block; height: 170px; width: auto; filter: drop-shadow(0 0 3px #FFFFFF) drop-shadow(0 10px 12px rgba(0,0,0,0.22));"></a>
+</div>
+</section>
+<section class="screen" id="ecran-smok" aria-label="Smok"><div class="app" style="width: 440px; height: 956px; max-width: none; box-shadow: none">
+  <header>
+    <a href="#ecran-accueil" aria-label="Retour à l'accueil" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; color: #FFFFFF; flex-shrink: 0; margin-left: -8px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg></a>
+    <span class="avatar"><img src="smok.png" alt=""></span>
+    <div>
+      <h1>Smok</h1>
+      <div class="status"><span class="dot" id="dot"></span><span id="status">Ton prof de polonais</span></div>
+    </div>
+    <div class="brand" aria-hidden="true"><b>sonigo</b><span>— TOURISME EN POLOGNE —</span></div>
+  </header>
+
+  <main id="scroll" aria-live="polite">
+    <div class="day">Aujourd'hui</div>
+    <ul id="list"></ul>
+  </main>
+
+  <div class="bottom">
+    <div class="label">Idées de questions</div>
+    <div class="chips" id="chips" role="group" aria-label="Idées de questions"></div>
+    <form id="form">
+      <label class="sr" for="q">Écris à Smok</label>
+      <textarea id="q" rows="1" placeholder="Écris n'importe quelle phrase…"></textarea>
+      <button class="send" id="send" type="submit" aria-label="Envoyer à Smok"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 20.5 21 12 3 3.5v6.5l11 2-11 2z"></path></svg></button>
+    </form>
+    <div class="note">Smok utilise l'IA de Claude : vérifie les traductions importantes.</div>
+  </div>
+</div></section>
+</div></div>
+<script>
+(function () {
+  var phone = document.getElementById('phone');
+  function fit() {
+    var s = Math.min(1, (window.innerHeight - 40) / 956, (window.innerWidth - 30) / 440);
+    phone.style.transform = 'scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit); fit();
+  var timers = [];
+  function type(sec) {
+    timers.forEach(clearInterval); timers = [];
+    sec.querySelectorAll('.ty').forEach(function (el) {
+      var full = el.getAttribute('data-full') || '', n = 0, wait = 0;
+      el.textContent = '';
+      el.style.whiteSpace = 'pre-line';
+      timers.push(setInterval(function () {
+        if (n < full.length) { n++; el.textContent = full.slice(0, n); }
+        else if (wait < 40) { wait++; }
+        else { wait = 0; n = 0; el.textContent = ''; }
+      }, 110));
+    });
+  }
+  function show() {
+    var id = (location.hash || '').replace('#', '');
+    var sec = document.getElementById(id) || document.getElementById('ecran-accueil');
+    document.querySelectorAll('.screen').forEach(function (s) { s.classList.toggle('on', s === sec); });
+    type(sec);
+  }
+  window.addEventListener('hashchange', show); show();
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href="#"]');
+    if (a) e.preventDefault();
+  });
+})();
+</script>
+<script>
+
+(function () {
+  var list = document.getElementById('list');
+  var scroller = document.getElementById('scroll');
+  var form = document.getElementById('form');
+  var input = document.getElementById('q');
+  var sendBtn = document.getElementById('send');
+  var statusEl = document.getElementById('status');
+  var dot = document.getElementById('dot');
+  var ai = null;
+  var busy = false;
+  var history = [];
+
+  var ideas = [
+    'Comment on dit bonjour ?',
+    'Je voudrais acheter un billet pour Cracovie',
+    'Où sont les toilettes, s’il vous plaît ?',
+    'Je suis allergique aux noix',
+    'Une table pour deux personnes, s’il vous plaît',
+    'Comment on prononce Szczebrzeszyn ?',
+    'Apprends-moi à compter jusqu’à 10'
+  ];
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+  function scrollDown() { scroller.scrollTop = scroller.scrollHeight; }
+
+  function addMe(text) {
+    list.appendChild(el('li', 'me', text));
+    history.push({ who: 'me', text: text });
+    scrollDown();
+  }
+  function smokShell() {
+    var li = el('li', 'smokmsg');
+    var mini = el('span', 'mini');
+    var im = el('img'); im.src = 'smok.png'; im.alt = '';
+    mini.appendChild(im);
+    var b = el('div', 'bubble');
+    li.appendChild(mini); li.appendChild(b);
+    list.appendChild(li);
+    return b;
+  }
+  function addSmok(r) {
+    var b = smokShell();
+    fill(b, r);
+    history.push({ who: 'smok', text: (r.text || '') + (r.pl ? ' [' + r.pl + ' = ' + (r.fr || '') + ']' : '') });
+    scrollDown();
+  }
+  function fill(b, r) {
+    b.textContent = '';
+    if (r.text) b.appendChild(document.createTextNode(r.text));
+    if (r.pl) {
+      var c = el('div', 'card');
+      c.appendChild(el('div', 'pl', r.pl));
+      if (r.pron) c.appendChild(el('div', 'pron', 'On dit : [' + r.pron + ']'));
+      if (r.fr) c.appendChild(el('div', 'fr', '= ' + r.fr));
+      b.appendChild(c);
+    }
+    if (r.tip) {
+      var t = el('div', 'tip');
+      t.appendChild(el('b', null, 'Astuce : '));
+      t.appendChild(document.createTextNode(r.tip));
+      b.appendChild(t);
+    }
+  }
+
+  var offline = [
+    [['bonjour', 'salut', 'coucou'], 'Cześć !', 'tchèchtch', 'Salut !'],
+    [['merci'], 'Dziękuję', 'djin-kou-yè', 'Merci'],
+    [['au revoir'], 'Do widzenia !', 'do vi-dzè-gna', 'Au revoir !'],
+    [['combien', 'prix'], 'Ile kosztuje ?', 'i-lè koch-tou-yè', 'Combien ça coûte ?'],
+    [['toilette'], 'Gdzie jest toaleta ?', 'gdjè yèst to-a-lè-ta', 'Où sont les toilettes ?'],
+    [['gare'], 'Gdzie jest dworzec ?', 'gdjè yèst dvo-jèts', 'Où est la gare ?']
+  ];
+  function local(q) {
+    var n = q.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    for (var i = 0; i < offline.length; i++) {
+      for (var j = 0; j < offline[i][0].length; j++) {
+        if (n.indexOf(offline[i][0][j]) !== -1) return { text: 'Voilà :', pl: offline[i][1], pron: offline[i][2], fr: offline[i][3] };
+      }
+    }
+    return { text: 'Mon IA n’est pas disponible pour le moment, je ne connais que quelques mots : bonjour, merci, au revoir, combien, la gare, les toilettes…' };
+  }
+
+  function prompt(q) {
+    var past = history.slice(-10).map(function (m) { return (m.who === 'me' ? 'Voyageur : ' : 'Smok : ') + m.text; }).join('\n');
+    return 'Tu es Smok, le petit dragon de Cracovie (Smok Wawelski), mascotte de l’appli de voyage sonigo. ' +
+      'Tu es un professeur de polonais chaleureux, drôle et patient pour des touristes francophones. Tu tutoies le voyageur.\n' +
+      'Règles :\n' +
+      '- Si le voyageur écrit en français, traduis fidèlement TOUT son message en polonais naturel, même s’il est long (pas seulement un mot).\n' +
+      '- S’il écrit en polonais, donne le sens en français et corrige gentiment ses fautes.\n' +
+      '- S’il pose une question sur la langue, la grammaire, la prononciation ou la culture polonaise, réponds clairement et simplement, avec un exemple en polonais.\n' +
+      '- S’il demande un exercice (compter, les jours, se présenter…), fais une mini-leçon.\n' +
+      '- Prononciation : écris-la pour un Français, syllabes séparées par des tirets (ex. dzień dobry → djègn do-bri).\n' +
+      '- Reste court et clair : le texte d’introduction fait 1 à 3 phrases.\n' +
+      'Réponds UNIQUEMENT avec un objet JSON : {"text": "ton message en français", "pl": "le polonais principal à retenir, ou vide", "pron": "sa prononciation, ou vide", "fr": "son sens en français, ou vide", "tip": "une astuce courte, ou vide"}.\n\n' +
+      (past ? 'Conversation récente :\n' + past + '\n\n' : '') +
+      'Nouveau message du voyageur : ' + q;
+  }
+
+  function ask(q) {
+    q = (q || '').trim();
+    if (!q || busy) return;
+    addMe(q);
+    input.value = '';
+    if (!ai) { addSmok(local(q)); return; }
+    busy = true; sendBtn.disabled = true;
+    var b = smokShell();
+    b.innerHTML = '<span class="typing" aria-label="Smok écrit"><span></span><span></span><span></span></span>';
+    scrollDown();
+    ai.json(prompt(q), { modelTier: 'default', cache: false }).then(function (r) {
+      r = r || {};
+      fill(b, r);
+      history.push({ who: 'smok', text: (r.text || '') + (r.pl ? ' [' + r.pl + ' = ' + (r.fr || '') + ']' : '') });
+    }).catch(function (e) {
+      var code = e && e.code;
+      if (code === 'not_granted') { ai = null; setStatus(false); }
+      var msg = code === 'rate_limited' ? 'Ouf, je suis un peu essoufflé ! Réessaie dans un petit moment.' : null;
+      fill(b, msg ? { text: msg } : local(q));
+    }).then(function () {
+      busy = false; sendBtn.disabled = false; scrollDown(); input.focus();
+    });
+  }
+
+  function setStatus(on) {
+    dot.className = on ? 'dot' : 'dot off';
+    statusEl.textContent = on ? 'Ton prof de polonais · IA' : 'Ton prof de polonais · mode simple';
+  }
+
+  ideas.forEach(function (t) {
+    var bt = el('button', null, t);
+    bt.type = 'button';
+    bt.addEventListener('click', function () { ask(t); });
+    document.getElementById('chips').appendChild(bt);
+  });
+  form.addEventListener('submit', function (e) { e.preventDefault(); ask(input.value); });
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ask(input.value); }
+  });
+
+  addSmok({ text: 'Cześć ! Je suis Smok, le dragon de Cracovie.\nÉcris-moi n’importe quelle phrase en français : je te la traduis en polonais, avec la prononciation. Tu peux aussi me poser des questions sur la langue ou la Pologne !' });
+  history = [];
+  setStatus(false);
+
+  try {
+    if (window.claude && window.claude.use) {
+      window.claude.use('sample').then(function (x) { ai = x || null; setStatus(!!ai); }).catch(function () { setStatus(false); });
+    }
+  } catch (e) { setStatus(false); }
+})();
+
+</script>
+</body>
+</html>
